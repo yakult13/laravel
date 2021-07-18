@@ -6,3 +6,7 @@ function SetupPass() {
 
 }
 PSWD="${PASS}"
+
+
+echo -e "setup pass"
+SetupPass
