@@ -1,0 +1,129 @@
+#! /bin/bash
+# Apache Installer
+# MySQL Installer
+# PHPMYADMIN Installer
+# Laravel Installer
+# Ubuntu 20.04
+# Script by: Juan
+
+ # Now check if our machine is in root user, if not, this script exits
+ # If you're on sudo user, run `sudo su -` first before running this script
+ if [[ $EUID -ne 0 ]];then
+ ScriptMessage
+ echo -e "[\e[1;31mError\e[0m] This script must be run as root, exiting..."
+ exit 1
+fi
+function ip_address(){
+  local IP="$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )"
+  [ -z "${IP}" ] && IP="$( wget -qO- -t1 -T2 ipv4.icanhazip.com )"
+  [ -z "${IP}" ] && IP="$( wget -qO- -t1 -T2 ipinfo.io/ip )"
+  [ ! -z "${IP}" ] && echo "${IP}" || echo
+} 
+IPADDR="$(ip_address)"
+
+function Updating() {
+    sudo apt update
+
+}
+
+function InstallApache2() {
+    sudo apt install apache2 -y 
+    sudo ufw allow "Apache Full"
+    sudo systemctl status apache2
+
+}
+
+function InstallMySQL() {
+    sudo apt install mysql-server -y
+    sudo mysql_secure_installation
+
+}
+
+function Installphpmyadmin() {
+    sudo apt install phpmyadmin php-mbstring php-zip php-gd php-json php-curl -y
+    ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+    sudo phpenmod mbstring
+    sudo systemctl restart apache2
+
+}
+
+function SetupPass() {
+    echo -e "Setup Your PhpMyAdmin Pass"
+    read -p "Enter phpmyadmin pass:" PASS
+    mysql
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '${PASS}';
+    exit
+
+}
+PSWD="${PASS}"
+
+function InstallComposer() {
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer && chmod +x /usr/local/bin/composer
+}
+
+function Laravel() {
+    cd /var/www/html
+    echo -e "Hit Enter When Ask to run for root"
+    read -p "Enter Folder Name for Laravel:" APP
+    composer create-project laravel/laravel ${APP}
+    cd laravelapp
+    php artisan
+    chown -R www-data:www-data /var/www/html/${APP}
+    chmod -R 775 /var/www/html/${APP}/storage
+    ln -s /usr/share/phpmyadmin /var/www/html/panel/public/phpmyadmin
+    sed -i "s|/var/www/html/|/var/www/html/${APP}|g" /etc/apache2/sites-available/000-default.conf && service apache2 restart
+    sudo apt-get install libssh2-1 php-ssh2
+}
+
+function ScriptMessage(){
+ echo -e ""
+ echo -e " (｡◕‿◕｡) Laravel Installer"
+ echo -e " Script Created: Juan"
+ echo -e ""
+
+}
+
+# Start of Installing Every Function
+ 
+ ScriptMessage
+ 
+ sleep 2
+
+echo -e "Updatin..."
+Updating
+
+echo -e "Installing Apache2..."
+InstallApache2
+
+echo -e "Installing MySQL..."
+InstallMySQL
+
+echo -e "Installing phpmyadmin..."
+Installphpmyadmin
+
+echo -e "Setting up phpmyadmin pass..."
+SetupPass
+
+echo -e "Installing Composer..."
+InstallComposer
+
+echo -e "Installing Laravel..."
+Laravel
+
+clear 
+
+# showing Additional Info
+ScriptMessage
+
+echo -e ""
+echo -e " Success Installation"
+echo -e " phpmyadmin: $IPADDR/phpmyadmin"
+echo -e " user: root"
+echo -e " pass: $PSWD"
+echo -e ""
+
+ # Clearing all logs from installation
+ rm -rf /root/.bash_history && history -c && echo '' > /var/log/syslog
+
+rm -f install*
