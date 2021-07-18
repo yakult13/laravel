@@ -1,7 +1,8 @@
 function SetupPass() {
     echo -e "Setup Your PhpMyAdmin Pass"
     read -p "Enter phpmyadmin pass:" PASS
-    mysql && mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY ${PASS}; && exit
+    mysql && mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY ${PASS};
+    exit
 
 }
 PSWD="${PASS}"
