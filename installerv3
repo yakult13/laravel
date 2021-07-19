@@ -76,6 +76,9 @@ function Laravel() {
     chown -R www-data:www-data /var/www/html/${APP}
     chmod -R 775 /var/www/html/${APP}/storage
     ln -s /usr/share/phpmyadmin /var/www/html/${APP}/public
+    apt install npm -y
+    npm install 
+    npm fund
     echo "<VirtualHost *:80>
             ServerAdmin webmaster@domain.com
             DocumentRoot /var/www/html/${APP}/public
