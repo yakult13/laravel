@@ -13,7 +13,15 @@ function Laravel() {
     chown -R www-data:www-data /var/www/html/${APP}
     chmod -R 775 /var/www/html/${APP}/storage
     ln -s /usr/share/phpmyadmin /var/www/html/${APP}/public
-    sed -i "s|/var/www/html/|/var/www/html/testing|g" /etc/apache2/sites-available/000-default.conf && service apache2 restart
+    echo "<VirtualHost *:80>
+            ServerAdmin webmaster@domain.com
+            DocumentRoot /var/www/html/${APP}/public
+            <Directory /var/www/html/${APP}>
+                AllowOverride All
+            </Directory>
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+        </VirtualHost>" > /etc/apache2/sites-available/000-default.conf && service apache2 restart
     sudo apt-get install libssh2-1 php-ssh2 -y
 }
 
