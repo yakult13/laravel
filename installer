@@ -13,6 +13,19 @@
  echo -e "[\e[1;31mError\e[0m] This script must be run as root, exiting..."
  exit 1
 fi
+
+# Reset
+Color_Off='\033[0m'       # Text Reset
+
+# Regular Colors
+
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+
+
 function ip_address(){
   local IP="$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )"
   [ -z "${IP}" ] && IP="$( wget -qO- -t1 -T2 ipv4.icanhazip.com )"
@@ -47,15 +60,6 @@ function Installphpmyadmin() {
 
 }
 
-function SetupPass() {
-    echo -e "Setup Your PhpMyAdmin Pass"
-    read -p "Enter phpmyadmin pass:" PASS
-    mysql
-    ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '${PASS}';
-    exit
-
-}
-PSWD="${PASS}"
 
 function InstallComposer() {
     curl -sS https://getcomposer.org/installer | php
@@ -67,19 +71,19 @@ function Laravel() {
     echo -e "Hit Enter When Ask to run for root"
     read -p "Enter Folder Name for Laravel:" APP
     composer create-project laravel/laravel ${APP}
-    cd laravelapp
+    cd /var/www/html/${APP}
     php artisan
     chown -R www-data:www-data /var/www/html/${APP}
     chmod -R 775 /var/www/html/${APP}/storage
-    ln -s /usr/share/phpmyadmin /var/www/html/panel/public/phpmyadmin
+    ln -s /usr/share/phpmyadmin /var/www/html/panel/public
     sed -i "s|/var/www/html/|/var/www/html/${APP}|g" /etc/apache2/sites-available/000-default.conf && service apache2 restart
-    sudo apt-get install libssh2-1 php-ssh2
+    sudo apt-get install libssh2-1 php-ssh2 -y
 }
 
 function ScriptMessage(){
  echo -e ""
- echo -e " (｡◕‿◕｡) Laravel Installer"
- echo -e " Script Created: Juan"
+ echo -e " \033[0;31m (｡◕‿◕｡) Laravel Installer \033[0m"
+ echo -e " \033[0;31m Script Created: Juan \033[0m"
  echo -e ""
 
 }
@@ -90,25 +94,22 @@ function ScriptMessage(){
  
  sleep 2
 
-echo -e "Updatin..."
+echo -e "\033[0;33m Updatin... \033[0m"
 Updating
 
-echo -e "Installing Apache2..."
+echo -e "\033[0;33m Installing Apache2...\033[0m"
 InstallApache2
 
-echo -e "Installing MySQL..."
+echo -e "\033[0;33m Installing MySQL... \033[0m"
 InstallMySQL
 
-echo -e "Installing phpmyadmin..."
+echo -e "\033[0;33m Installing phpmyadmin... \033[0m"
 Installphpmyadmin
 
-echo -e "Setting up phpmyadmin pass..."
-SetupPass
-
-echo -e "Installing Composer..."
+echo -e "\033[0;33m Installing Composer... \033[0m"
 InstallComposer
 
-echo -e "Installing Laravel..."
+echo -e "\033[0;33m Installing Laravel... \033[0m"
 Laravel
 
 clear 
@@ -117,13 +118,15 @@ clear
 ScriptMessage
 
 echo -e ""
-echo -e " Success Installation"
-echo -e " phpmyadmin: $IPADDR/phpmyadmin"
-echo -e " user: root"
-echo -e " pass: $PSWD"
+echo -e "\033[0;33m  Success Installation \033[0m"
+echo -e "\033[0;35m phpmyadmin: $IPADDR/phpmyadmin \033[0m"
+echo -e "\033[0;36m To Setup phpmyadmin pass run: \033[0m"
+echo -e "\033[0;31m 1.) mysql \033[0m"
+echo -e "\033[0;31m 2.) ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'passmo'; \033[0m"
+echo -e "\033[0;31m 3.) exit \033[0m"
 echo -e ""
 
  # Clearing all logs from installation
  rm -rf /root/.bash_history && history -c && echo '' > /var/log/syslog
 
-rm -f install*
+rm -f insta*
