@@ -1,14 +1,16 @@
-#! /bin/bash
-# Apache Installer
-# MySQL Installer
-# PHPMYADMIN Installer
+#!/bin/bash
 # Laravel Installer
-# Ubuntu 20.04
-# Script by: Juan
+# Script by Juan
+# 
+# Illegal selling and redistribution of this script is strictly prohibited
+# Please respect author's Property
+# Binigay sainyo ng libre, ipamahagi nyo rin ng libre.
+#
+#
 
  # Now check if our machine is in root user, if not, this script exits
  # If you're on sudo user, run `sudo su -` first before running this script
- if [[ $EUID -ne 0 ]];then
+if [[ $EUID -ne 0 ]];then
  ScriptMessage
  echo -e "[\e[1;31mError\e[0m] This script must be run as root, exiting..."
  exit 1
@@ -144,4 +146,6 @@ echo -e "\033[0;33m REPORT to kakatol@ninjadns.net \033[0m"
  # Clearing all logs from installation
  rm -rf /root/.bash_history && history -c && echo '' > /var/log/syslog
 
-rm -f insta*
+rm -rf /root/installer*
+
+exit 1
