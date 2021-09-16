@@ -37,7 +37,9 @@ function ip_address(){
 IPADDR="$(ip_address)"
 
 function Updating() {
+    export DEBIAN_FRONTEND=noninteractive
     sudo apt update
+    apt upgrade -y
 
 }
 
